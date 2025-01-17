@@ -16,4 +16,4 @@ This web server was supposed to do a few things. The end goal was a "server host
 - I didn't know the first thing about authentication and/or proper security measures.
 - I didn't really know what I wanted to do with this project. I kind of just went with whatever came to mind.
 - I did all of this in the span of a week and a half. 
-- I did try my best, but I could've tried even harder LOL
+- I didn't really try my best LOL
