@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body{
+            /* background: #080a12; */
+            background-color: #FF3CAC;
+            background-image: linear-gradient(225deg, #FF3CAC 0%, #784BA0 50%, #2B86C5 100%);
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+        }
+        .loader{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #080a12;
+            transition: 0.75s;
+            z-index: 999;
+        }
+        .loader-hidden{
+            visibility: hidden;
+            opacity: 0;
+        }
+        .loader::after{
+            content: "";
+            width: 75px;
+            height: 75px;
+            border: solid 15px #ddd;
+            border-top-color: #00a996;
+            border-radius: 50%;
+            animation: loading 0.75s ease infinite;
+        }
+        @keyframes loading {
+            from {transform: rotate(0turn)}
+            to {transform: rotate(1turn)}
+        }
+        .main-container{
+            padding: 15px 9%;
+            width: 100%;
+            padding-bottom: 100px;
+        }
+        .heading{
+            text-align: center;
+            padding-bottom: 15px;
+            color: #fff;
+            text-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+            font-size: 50px;
+        }
+        .grid-container{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 15px;
+        }
+        .item{
+            border-radius: 5px;
+            background: #fff;
+            text-align: center;
+            padding: 30px 20px;
+        }
+        .item h3{
+            color: #444;
+            font-size: 22px;
+            padding: 10px 0;
+        }
+        .item p{
+            color: #777;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+        .item .btn{
+            margin-top: 10px;
+            display: inline-block;
+            width: 75%;
+            background: #333;
+            color: #fff;
+            font-size: 16px;
+            text-decoration: none;
+            border-radius: 5px;
+            padding: 8px 25px;
+        }
+        .item .playerCount {
+            margin-top: 5px;
+            color: #444;
+            font-size: 16px;
+            padding: 5px 0;
+        }
+        .item .playTime {
+            color: #444;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .item .lastOnline {
+            color: #444;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .item .votes {
+            color: #444;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .nav {
+            width: 100%;
+            height: 50px;
+            border-radius: 10px;
+            background: #080a12;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .timer {
+            font-size: 22px;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader"></div>
+
+    <div class="main-container">
+        <div class="nav">
+            <h1 class="timer"></h1>
+            
+        </div>
+        <h1 class="heading">Game Servers</h1>
+        <div class="grid-container"></div>
+    </div>
+
+    <script>
+        var rateOfTableRetrieval = 2    // In Seconds. How often the site make an API call to the server.
+        var rateOfMCStatusUpdate = 5    // In Seconds. How often the site makes an API call to get the active player count of the minecraft server.
+
+        const serversInfo = async () => {
+            const resServersInfo = await fetch(`${window.location.origin}/serversInfo`, { method: 'GET' })
+            const json = await resServersInfo.json()
+            const data = json.json
+
+            const grid = document.querySelector('.grid-container')
+            for (var i = 0; i < data.length; i++) {
+                const serverItem = document.createElement('div')
+                serverItem.classList.add('item', `item${i}`)
+
+                var playtimeHours = Math.floor(data[i].TotalPlaytime / 3600)
+                var playtimeMinutes = Math.floor((data[i].TotalPlaytime % 3600) / (60))
+                var playtimeSeconds = data[i].TotalPlaytime % 60
+
+                if (playtimeHours < 10) { playtimeHours = '0' + playtimeHours.toString() }
+                if (playtimeMinutes < 10) { playtimeMinutes = '0' + playtimeMinutes.toString() }
+                if (playtimeSeconds < 10) { playtimeSeconds = '0' + playtimeSeconds.toString() }
+
+                serverItem.innerHTML = `
+                    <h3>${data[i].Heading}</h3>
+                    <p>${data[i].ExtraInfo}</p>
+                    <a href="${data[i].ButtonLink}" class="btn">${data[i].ButtonMessage}</a>
+                    <p class="playerCount">Player Count: ???</p>
+                    <p class="playTime">Total Play Time: ${playtimeHours}h ${playtimeMinutes}m ${playtimeSeconds}s</p>
+                    <p class="lastOnline">Time Last Online:\n${data[i].LastOnline}</p>
+                `
+                grid.appendChild(serverItem)
+            }
+        }
+
+        var dist = 0
+        const getServerTime = async () => {
+            const resServerTime = await fetch(`${window.location.origin}/serverTime`, { method: 'GET' })
+            const json = await resServerTime.json()
+            dist = json.dist            
+        }
+ 
+        const initVotesAndActive = async () => {
+            const resTables = await fetch(`${window.location.origin}/getTables`, { method: 'GET' })
+            const json = await resTables.json()
+            var tables = json.tables
+
+            for (var i = 0; i < tables.votes.length; i++) {
+                var item = document.querySelector(`.item${i}`)
+                var p = document.createElement('p')
+                p.classList.add('votes')
+                p.innerHTML = `Votes: ${tables.votes[i]}`
+                var btn = document.createElement('btn')
+                btn.classList.add('btn', 'btnVote')
+                btn.innerHTML = 'Vote For Server'
+                btn.id = item.classList.toString().split(' ')[1][4]
+                item.appendChild(btn)
+                item.appendChild(p)
+            }
+
+            var item = document.querySelector(`.item${i}`)
+            var btns = document.querySelectorAll('.btnVote')
+            btns.forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const res = await fetch(`${window.location.origin}/voteServer`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 'whatServer': Number(btn.id) })
+                    })
+                    const json = await res.json()
+                    if (json?.status == 'Error') {
+                        alert(`Status: ${json?.status}\nMessage: ${json?.message}`)
+                    }
+                })
+            })
+
+        }  
+
+        function startHeartbeat() {
+            var heartbeat = setInterval(function(){
+                var hours = Math.floor(dist / 3600)
+                var minutes = Math.floor((dist % 3600) / (60))
+                var seconds = dist % 60
+
+                if (hours < 10) { hours = '0' + hours.toString() }
+                if (minutes < 10) { minutes = '0' + minutes.toString() }
+                if (seconds < 10) { seconds = '0' + seconds.toString() }
+
+                document.querySelector('.timer').innerHTML = 'Time Till Next Reselection: ' + hours + ':' + minutes + ':' + seconds
+
+                if ((hours == 0 && minutes == 0 && seconds == 0)) {
+                    clearInterval(heartbeat)
+                    location.reload()
+                }
+                dist -= 1
+            }, 1000)
+        } 
+
+        function getTables() {
+            var heartbeat = setInterval(async function(){
+                try {
+                    const resTables = await fetch(`${window.location.origin}/getTables`, { method: 'GET' })
+                    const json = await resTables.json()
+                    var tables = json.tables
+
+                    for(var i = 0; i < tables.votes.length; i++) {
+                        var item = document.querySelector(`.item${i}`)
+                        var p = item.querySelector('.votes')
+                        p.innerHTML = `Votes: ${tables.votes[i]}`
+                    }
+                } catch {
+                    console.log('Server Error')
+                    location.reload()
+                }
+            }, (rateOfTableRetrieval * 1000))
+        }
+
+        function getMCServerStatus() {
+            var heartbeat = setInterval(async function(){
+                const resp = await fetch(`${window.location.origin}/getMCStatus`, { method: 'GET' })
+                const json = await resp.json()
+                var playerCount = json.response.players.online + '/' + json.response.players.max
+                var playerCountDiv = document.querySelectorAll('.playerCount')[0]
+                playerCountDiv.innerHTML = 'Player Count: ' + playerCount
+            }, 5000)
+        }
+
+        window.addEventListener('load', () => {
+            serversInfo()
+            getServerTime()
+            initVotesAndActive()
+            startHeartbeat()
+            getTables()
+            getMCServerStatus()
+            document.querySelector('.loader').classList.toggle('loader-hidden')
+        })
+    </script>
+</body>
+</html>

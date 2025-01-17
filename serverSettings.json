@@ -1,0 +1,60 @@
+{  
+    "serverSettings": {
+        "PORT": 7000,
+        "PASSWORD": ""
+    },
+
+    "generalSettings": {
+        "mcSkinSizeLimitInMB": 2,
+        "votingTimeBetweenReset": 7200,
+        "resetVotesOnZero": 0
+    },
+
+    "dynamicServers": {
+        "Length": 5,
+        "Info": [
+            {
+                "Heading": "Minecraft",
+                "ExtraInfo": "For more information on the Minecraft Server, click on the button below!",
+                "ButtonLink": "#",
+                "ButtonMessage": "More info",
+                "LastOnline": "08 May 2024 00:00:00 GMT+0200",
+                "TotalPlaytime": 0,
+                "ServerIP": "197.242.207.98",
+                "ServerPort": 25565
+            },
+            {
+                "Heading": "Rust",
+                "ExtraInfo": "For more information on the Rust Server, click on the button below!",
+                "ButtonLink": "#",
+                "ButtonMessage": "More info",
+                "LastOnline": "08 May 2024 00:00:00 GMT+0200",
+                "TotalPlaytime": 0
+            },
+            {
+                "Heading": "V-Rising",
+                "ExtraInfo": "For more information on the V-Rising Server, click on the button below!",
+                "ButtonLink": "#",
+                "ButtonMessage": "More info",
+                "LastOnline": "08 May 2024 00:00:00 GMT+0200",
+                "TotalPlaytime": 0
+            },
+            {
+                "Heading": "Satisfactory",
+                "ExtraInfo": "For more information on the Satisfactory Server, click on the button below!",
+                "ButtonLink": "#",
+                "ButtonMessage": "More info",
+                "LastOnline": "08 May 2024 00:00:00 GMT+0200",
+                "TotalPlaytime": 0
+            },
+            {
+                "Heading": "Terraria",
+                "ExtraInfo": "For more information on the Terraria Server, click on the button below!",
+                "ButtonLink": "#",
+                "ButtonMessage": "More info",
+                "LastOnline": "08 May 2024 00:00:00 GMT+0200",
+                "TotalPlaytime": 0
+            }
+        ]
+    }
+}

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Upload</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body{
+            background: #080a12;
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+        }
+        .loader{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #080a12;
+            transition: 0.75s;
+            z-index: 999;
+        }
+        .loader-hidden{
+            visibility: hidden;
+            opacity: 0;
+        }
+        .loader::after{
+            content: "";
+            width: 75px;
+            height: 75px;
+            border: solid 15px #ddd;
+            border-top-color: #00a996;
+            border-radius: 50%;
+            animation: loading 0.75s ease infinite;
+        }
+        @keyframes loading {
+            from {transform: rotate(0turn)}
+            to {transform: rotate(1turn)}
+        }
+        .uploadForm{
+            width: clamp(320px, 30%, 430px);
+            margin: 0 auto;
+            background: #fff;
+            border: solid 1px #ccc;
+            border-radius: 0.35rem;
+            padding: 1.5rem;
+        }
+        .text-center{
+            text-align: center;
+        }
+        .title {
+            margin-bottom: 20px;
+        }
+        .filesLabel{
+            display: block;
+            position: relative;
+            background-color: #080a12;
+            color: #fff;
+            font-size: 1.12em;
+            font-weight: 500;
+            text-align: center;
+            width: 75%;
+            padding: 1.12em 0;
+            margin: auto;
+            border-radius: 0.31em;
+            cursor: pointer;
+        }
+        #num-of-files{
+            font-weight: 400;
+            text-align: center;
+            margin: 1.25em 1.87em 0;
+        }
+        .input-group ul{
+            list-style-type: none;
+        }
+        .input-group li{
+            font-weight: 500;
+            background-color: #ddd;
+            color: #080a12;
+            margin-bottom: 1em;
+            padding: 1.1em 1em;
+            border-radius: 0.3em;
+            display: flex;
+            justify-content: space-between;
+        }
+        .btn{
+            padding: 0.75rem;
+            display: block;
+            text-decoration: none;
+            background-color: #080a12;
+            color: #fff;
+            text-align: center;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        input{
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            border: solid 1px #ccc;
+            border-radius: 0.25rem;
+        }
+        input:focus{
+            outline: none;
+            border: none;
+            border: solid 1px #080a12;
+        }
+        label{
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .input-group{
+            margin: 2rem 0;
+        }
+        .btn{
+            padding: 0.75rem;
+            display: block;
+            text-decoration: none;
+            background-color: #080a12;
+            color: #fff;
+            text-align: center;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn:hover{
+            box-shadow: 0 0 0 2px #fff, 0 0 0 3px #080a12;
+        }
+        .myFiles{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="loader"></div>
+    <form id="uploadForm" class="uploadForm" enctype="multipart/form-data">
+        <div class="input-group">
+            <h1 class="text-center title">MC Skin Upload</h1>
+            <input type="file" id="myFiles" class="myFiles" />
+            <label for="myFiles" class="filesLabel"><i class="fa-solid fa-arrow-up-from-bracket"></i>&nbsp; Choose Skin File To Upload</label>
+            <div id="num-of-files">No Files Chosen</div>
+            <ul id="files-list"></ul>
+            <input type="submit" value="Submit" class="btn btn-submit" />
+        </div>
+    </form>
+
+    <script>
+        window.addEventListener('load', () => {
+            document.querySelector('.loader').classList.toggle('loader-hidden')
+        })
+
+        let fileInput = document.getElementById('myFiles');
+        let fileList = document.getElementById('files-list');
+        let numOfFiles = document.getElementById('num-of-files');
+
+        fileInput.addEventListener('change', () => {
+            fileList.innerHTML = ""
+            numOfFiles.textContent = fileInput.files.length > 1 ? `${fileInput.files.length} Files Selected` : `${fileInput.files.length} File Selected`
+
+            Object.keys(fileInput.files).forEach(key => {
+                let reader = new FileReader()
+                let listItem = document.createElement('li');
+                let fileName = fileInput.files[key].name
+                let fileSize = (fileInput.files[key].size / 1024).toFixed(1)
+                listItem.innerHTML = `<p>${fileName}</p><p>${fileSize}KB</p>`
+                if(fileSize >= 1024) {
+                    fileSize = (fileSize / 1024).toFixed(1)
+                    listItem.innerHTML = `<p>${fileName}</p><p>${fileSize}MB</p>`
+                }
+                fileList.append(listItem);
+            })
+        })
+
+        const submitBtn = document.querySelector('.btn-submit')
+
+        const sendFiles = async () => {
+            const myFiles = document.getElementById('myFiles').files
+
+            const formData = new FormData();
+
+            Object.keys(myFiles).forEach(key => {
+                var fileName = getUID() + '.' + myFiles.item(key).name.split('.')[1]
+                const renamedFile = new File([myFiles.item(key)], fileName, {type: myFiles.item(key).type})
+                formData.append(renamedFile.name, renamedFile)
+            })
+
+            const response = await fetch(`${window.location.origin}/skinupload`, {
+                method: 'POST',
+                body: formData
+            })
+
+            const json = await response.json()
+
+            alert(`Status: ${json?.status}\nMessage: ${json?.message}`)
+            navigator.clipboard.writeText(window.location.origin + json?.url)
+            // location.reload()
+        }
+
+        submitBtn.addEventListener('click', (e) => {
+            e.preventDefault()
+            toggleLoading()
+            sendFiles()
+        })
+
+        function getUID() {
+            return Date.now().toString(36) + Math.floor(Math.pow(10, 12) + Math.random() * 9*Math.pow(10, 12)).toString(36);
+        }
+        function toggleLoading() {
+            document.querySelector('.loader').classList.toggle('loader-hidden')
+        }
+    </script>
+</body>
+</html>
